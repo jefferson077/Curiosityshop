@@ -1,0 +1,177 @@
+﻿@page "/Facturas"
+@using Data.Model
+@using Data.Service
+
+@inject IClienteService ClienteService
+@inject IFacturaService FacturaService
+@inject IProductoService ProductoService
+@inject IFacturaProductoService FacturaProductoService
+@inject NavigationManager NavigationManager
+
+<h1 class="text-center">INGRESO DE FACTURAS</h1>
+<table width="1000" cellspacing="50">
+    <thead>
+        <tr>
+            <th colspan="1" class="text-center"> Ingrese ID de Cliente </th>
+            <td colspan="1" class="text-center"> <input type="text" size="1" @oninput="@((e) => { fact.Id_cliente=Int32.Parse((String)e.Value);})" /></td>
+            <th colspan="1" class="text-center"> Su ID de Factura </th>
+            <th colspan="1" class="text-center"> @fact.Id_factura</th>
+        </tr>
+        @if (fact.Id_cliente != 0)
+        {
+            @foreach (var clients in clientes)
+            {
+
+                @if (fact.Id_cliente.Equals(clients.Id_cliente))
+                {
+                    fact.Fecha_Factura = now;
+                    fact.Direccion_entrega = clients.Direccionclient;
+                    fact.Ciudad_entrega = clients.Ciudad;
+                    <tr>
+                        <td colspan="1" class="text-center">@clients.Nombreclient</td>
+                        <td colspan="1" class="text-center">@clients.Apellidosclient</td>
+                        <td colspan="1" class="text-center">@clients.Ciudad</td>
+                        <td colspan="1" class="text-center">@clients.Direccionclient</td>
+                        <th colspan="1" class="text-center"> Fecha  </th>
+                        <td colspan="1" class="text-center">@now</td>
+                    </tr>
+                    <tr><th><br />  </th></tr>
+                }
+            }
+        }
+
+    </thead>
+</table>
+
+<h3 class="text-center">BUSQUEDA DE PRODUCTOS</h3>
+
+<table width="1000" cellspacing="50">
+    <thead>
+        <tr>
+            <th colspan="1" class="text-center">ID PRODUCTO</th>
+            <th colspan="1" class="text-center">NOMBRE</th>
+            <th colspan="1" class="text-center">PRECIO</th>
+            <th colspan="1" class="text-center">CANTIDAD</th>
+            <th colspan="1" class="text-center">CATEGORIA</th>
+        </tr>
+        <tr>
+
+            <td colspan="1" class="text-center"> <input type="text" size="1" @oninput="@((e) => { prod.Id_Prod=Int32.Parse((String)e.Value);})" /></td>
+
+            @if (prod.Id_Prod != 0)
+            {
+                @foreach (var producto in productos)
+                {
+
+                    @if (prod.Id_Prod.Equals(producto.Id_prod))
+                    {
+                        prod.Categoria_prod = producto.Categoria_prod;
+                        prod.Id_cliente = fact.Id_cliente;
+                        prod.Id_factura = fact.Id_factura;
+                        prod.Precio = producto.Precio_prod;
+                        prod.Cantidad2 = "0";
+                        prod.Id_fp = 0;
+                        <th colspan="1" class="text-center">@producto.Nombre_prod</th>
+
+                        <th colspan="1" class="text-center">@producto.Precio_prod</th>
+                        <td colspan="1" class=text-center> <input type="text" size="1" @oninput="@((e) => { prod.Cantidad=Int32.Parse((string)e.Value);})" /></td>
+                        <th colspan="1" class="text-center">@producto.Categoria_prod</th>
+
+                        <th>
+                            <button type="reset" class="btn btn-default" aria-label="Left Align" title="Agregar" @onclick="()=>AgregarProd(prod)">
+                                <span type="reset" class="oi oi-plus" aria-hidden="true"></span>
+                            </button>
+                        </th>
+                    }
+                }
+            }
+        </tr>
+        <tr>
+        </tr>
+
+    </thead>
+</table>
+<h3 class="text-center">PRODUCTOS A FACTURAR</h3>
+<table width="1000" cellspacing="50">
+    <thead>
+        <tr>
+            <th colspan="1" class="text-center">ID PRODUCTO</th>
+            <th colspan="1" class="text-center">PRECIO</th>
+            <th colspan="1" class="text-center">CANTIDAD</th>
+            <th colspan="1" class="text-center">CATEGORIA</th>
+        </tr>
+        @if (fp != null)
+        {
+    
+            @foreach (var factprod in fp)
+            {
+                <tr>
+                    <th colspan="1" class="text-center">@factprod.Id_Prod</th>
+                    <th colspan="1" class="text-center">@factprod.Precio</th>
+                    <th colspan="1" class="text-center">@factprod.Cantidad</th>
+                    <th colspan="1" class="text-center">@factprod.Categoria_prod</th>
+
+                    <th>
+                        <button type="button" class="btn btn-defaul" aria-label="Left Align" title="Delete" @onclick="()=>EliminarProd(prod)">
+                            <span class="oi oi-trash" aria-hidden="true"></span>
+                        </button>
+                    </th>
+
+                </tr>
+
+            }
+        }
+
+
+        <tr>
+            <td colspan="2">
+                <input type="submit" value="Crear Factura" @onclick="@crearfactura" />
+                <input type="button" value="Cancelar" @onclick="@cancel" />
+            </td>
+        </tr>
+
+
+    </thead>
+    </table>
+
+@code {
+    IEnumerable<Cliente> clientes;
+    IEnumerable<Producto> productos;
+    Factura fact = new Factura();
+    FacturaProducto prod = new FacturaProducto();
+    List<FacturaProducto> fp;
+    string format = "dd/MM/yyyy";
+    String now;
+
+    protected override async Task OnInitializedAsync()
+    {
+        fp = new List<FacturaProducto>();
+        clientes = await ClienteService.GetAllClients();
+        productos = await ProductoService.GetAllProductos();
+        now = DateTime.Now.ToString(format);
+        fact.Id_factura = await FacturaService.NumeroFactura();
+    }
+
+    public void AgregarProd(FacturaProducto product)
+    {
+        fp.Add((FacturaProducto)product);
+
+    }
+    public void EliminarProd(FacturaProducto product)
+    {
+        fp.Remove((FacturaProducto)product);
+
+    }
+
+    protected async Task crearfactura()
+    {
+
+    }
+
+    protected async Task cancel()
+    {
+
+    }
+
+
+    }

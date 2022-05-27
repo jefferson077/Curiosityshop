@@ -1,0 +1,60 @@
+﻿@page "/ListaFacturas"
+@using Curiosityshop.Data.Service
+@using Curiosityshop.Data.Model
+
+@inject IFacturaService FacturaService
+@inject NavigationManager NavigationManager
+
+<h1>Lista de Facturas</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID Factura</th>
+            <th>ID Cliente</th>
+            <th>Total Pedido</th>
+            <th colspan="2">Acción</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (facturas != null)
+        {
+            @foreach (var factura in facturas)
+            {
+                <tr>
+                    <td>@factura.Id_factura</td>
+                    <td>@factura.Id_cliente</td>
+                    <td>
+                        <button type="button" class="btn btn-default" aria-label="Left Align" title="Edit">
+                            <span class="oi oi-pencil" aria-hidden="true"></span>
+                        </button>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-default" aria-label="Left Align" title="Delete">
+                            <span class="oi oi-trash" aria-hidden="true"></span>
+                        </button>
+                    </td>
+
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+@code {
+
+    IEnumerable<Factura> facturas;
+
+    protected override async Task OnInitializedAsync()
+    {
+      //  facturas = await FacturaService.GetAllFacturas();
+    }
+
+    void EditarRegistro(int id)
+    {
+        NavigationManager.NavigateTo("/");
+    }
+
+}
+
+

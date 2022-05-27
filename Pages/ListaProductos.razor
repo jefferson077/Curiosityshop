@@ -1,0 +1,97 @@
+﻿@page "/ListaProductos"
+
+@using Data.Model
+@using Data.Service
+
+@inject IProductoService ProductoService
+@inject NavigationManager NavigationManager
+
+<h2 class="text-center">Lista de Productos</h2>
+
+<th colspan="2" class="text-center"></th>
+    <table width="1000" cellspacing="50">
+        <tbody>
+            @if (Prod != null)
+            {
+                @foreach (var prod1 in Prod)
+                {
+                    @if (prod.Id_prod.Equals(prod.Id_prod))
+                    {
+                        <tr>
+                            <th colspan="1" class="text-center">
+                                <div class="card" style="width: 18rem;">
+                                    <img src="" class="card-img-top" alt="...">
+                                    <div class="card-body">
+                                        <h5 class="card-title">@prod1.Nombre_prod</h5>
+                                        <p class="card-text">@prod1.Descripcion_prod</p>
+                                    </div>
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item">Precio: @prod1.Precio_prod</li>
+                                        <li class="list-group-item">Color: @prod1.Color_prod</li>
+                                    </ul>
+                                    <div class="card-body">
+                                        <a href="#Factura" class="text-center card-link ">Agregar Carrito</a>
+                                    </div>
+                                </div>
+                            </th>
+                        </tr>
+                        <tr><th><br />  </th></tr>
+                      }
+                }
+            }
+            </tbody>
+
+            </table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            @code {
+
+                IEnumerable<Producto> Prod;
+                Producto prod = new Producto();
+
+
+
+                protected override async Task OnInitializedAsync()
+                {
+                    Prod = await ProductoService.GetAllProductos();
+
+                }
+
+
+
+
+                async Task BuscaProducto()
+                {
+
+
+                }
+
+
+            }

@@ -1,0 +1,225 @@
+﻿@page "/CalcularEnvio"
+@using Data.Model
+@using Data.Service
+
+@inject IDevolucionService DevolucionService
+@inject IFacturaService FacturaService
+@inject IProductoService ProductoService
+@inject IFacturaProductoService FacturaProductoService
+@inject IDevolucionProductoService DevolucionProductoService
+@inject NavigationManager NavigationManager
+
+<h1 class="text-center">SUS COMPRAS</h1>
+<EditForm Model="@Calcula">
+    <table width="1000" cellspacing="50">
+
+
+        <thead>
+            <tr>
+                <th colspan="1" class="text-center"> Cliente  </th>
+                <td colspan="1" class="text-center">@idclient</td>
+            </tr>
+            <tr><th><br />  </th></tr>
+
+            <tr>
+                <th colspan="2" class="text-center">PRODUCTO</th>
+                <th colspan="2" class="text-center">PRECIO</th>
+                <th colspan="2" class="text-center">FACTURA</th>
+                <th colspan="2" class="text-center">CANTIDAD COMPRADA</th>
+                <th colspan="2" class="text-center">PESO EN KG</th>
+                <th colspan="2" class="text-center">SELECCION DE PRODUCTO</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (fproductos != null)
+            {
+                @foreach (var fproducto in fproductos)
+
+
+                {
+                    @if (idclient.Equals(fproducto.Id_cliente))
+                    {
+                        <tr>
+                            <td colspan="2" class="text-center">@fproducto.Id_Prod</td>
+                            <td colspan="2" class="text-center">@fproducto.Precio</td>
+                            <td colspan="2" class="text-center">@fproducto.Id_factura</td>
+                            <td colspan="2" class="text-center">@fproducto.Cantidad</td>
+                            @foreach (var producto in productos)
+                            {
+                                @if (producto.Id_prod.Equals(fproducto.Id_Prod))
+                                {
+                                    <td colspan="2" class="text-center">@producto.Peso</td>
+                                    <td colspan="2" class="text-center">
+                                        <input type="checkbox" @onchange="eventArgs => { CheckboxSeleccionado(producto.Id_prod, producto.Peso, eventArgs.Value); }" value="Seleccionar" />
+                                    </td>
+                                }
+
+                            }
+
+                        </tr>
+                    }
+
+
+                }}
+
+
+            <tr><th><br />  </th></tr>
+            <tr><th><br />  </th></tr>
+        </tbody>
+
+    </table>
+    <div style="color: black;">
+        <h2> Costo total de envio</h2>
+        <p>
+            Tipo de Zona
+            <input type="radio" id="metropolitana" name="select"  value="metro" @onclick="()=>metro()">
+            <label for="vehicle1"> Metropolitana</label>
+            <input type="radio" id="rural" name="select" value="rural" @onclick="()=>rural()">
+            <label for="vehicle2"> Rural</label><br>
+        </p>
+
+        <p>
+            Cantidad total en Kilo Gramos
+            <span style="color: blue;"> @TotalPeso Kg</span>
+        </p>
+        @if (TotalPeso <= 1)
+        {
+            ValorPagar = 5000 + ValorZona;
+
+        }
+
+        @if (TotalPeso > 1 && TotalPeso <= 3)
+        {
+            ValorPagar = 7000 + (ValorZona);
+        }
+        @if (TotalPeso > 3 && TotalPeso <= 5)
+        {
+            ValorPagar = 10000 + (ValorZona);
+        }
+
+        @if (TotalPeso > 5 && TotalPeso <= 10)
+        {
+            ValorPagar = 18000 + (ValorZona);
+        }
+
+
+
+
+        <p>
+
+            Valor a Pagar
+            <span style="color: blue;"> $ @ValorPagar</span>
+        </p>
+
+
+
+    </div>
+    <div style="color: black; position: absolute; top: 340px; left: 800px;">
+        <h5 align="center"> TABLA DE COSTOS</h5>
+        <table border="1" width="400" cellspacing="40">
+
+
+            <thead>
+                <tr>
+                    <th>Rango de Peso </th>
+                    <th>Zona Metropolitana </th>
+                    <th>Zona Rural</th>
+
+                </tr>
+                <tr>
+                    <td align="center">Hasta 1 Kg</td>
+                    <td align="center">$5.000</td>
+                    <td align="center">$7.000</td>
+                </tr>
+                <tr>
+                    <td align="center">Entre 1 y 3 Kg</td>
+                    <td align="center">$7.000</td>
+                    <td align="center">$9.000</td>
+                </tr>
+                <tr>
+                    <td align="center">Entre 3 y 5 Kg</td>
+                    <td align="center">$10.000</td>
+                    <td align="center">$13.000</td>
+                </tr>
+                <tr>
+                    <td align="center">Entre 5 y 10 Kg</td>
+                    <td align="center">$18.000</td>
+                    <td align="center">$21.000</td>
+                </tr>
+            </thead>
+        </table>
+
+
+
+
+    </div>
+</EditForm>
+
+@code {
+    IEnumerable<FacturaProducto> fproductos;
+    IEnumerable<Producto> productos;
+    public int idclient = 111;
+    List<FacturaProducto> listaProductos;
+    Devolucion Calcula = new Devolucion();
+    public float TotalPeso = 0;
+    public float ValorPagar = 0;
+    public float ValorZona = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        fproductos = await FacturaProductoService.GetAllFacturasProductos();
+        productos = await ProductoService.GetAllProductos();
+    }
+
+    public void CheckboxSeleccionado(int codProducto, float peso, object aChecked)
+    {
+        if ((bool)aChecked)
+        {
+            TotalPeso = TotalPeso + peso;
+        }
+        else
+        {
+            TotalPeso = TotalPeso - peso;
+        }
+
+
+        /*
+        foreach (var apt in productos)
+        {
+            if (apt.Peso == peso && (bool)aChecked)
+            {
+                TotalPeso = TotalPeso + peso;
+
+            }else{
+
+            }
+        }*/
+    }
+
+    protected async Task metro()
+    {
+
+
+        ValorZona = 0;
+
+    }
+
+    protected async Task rural()
+    {
+        @if (TotalPeso < 3)
+        {
+            ValorZona = 2000;
+        }
+
+        @if (TotalPeso >= 3)
+        {
+            ValorZona = 3000;
+        }
+
+    }
+
+
+
+
+
+}

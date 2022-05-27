@@ -1,0 +1,56 @@
+﻿@page "/AgregarProductos"
+
+@using Data.Model
+@using Data.Service
+
+@inject IProductoService ProductoService
+@inject NavigationManager NavigationManager
+
+<h2 class="text-center">Agregar producto en stock</h2>
+
+<form>
+    <table width="700" cellspacing="50">
+        <thead>
+            <br />
+                <input type="text" name="nombre" placeholder="Escribe el nombre del producto" class="form-control" @bind="producto.Nombre_prod" />
+                <br />
+                <input type="text" name="Descripcion" placeholder="Escribe la descripcion del producto" class="form-control" @bind="producto.Descripcion_prod" />
+                <br />
+                <input type="text" name="Color" placeholder="Escribe el color del producto" class="form-control" @bind="producto.Color_prod" />
+                <br />
+                <input type="text" name="Cantidad" placeholder="Escribe la Cantidad del producto" class="form-control" @bind="producto.Cantidad" />
+                <br />
+                <input type="text" name="Precio" placeholder="Escribe el precio del producto" class="form-control" @bind="producto.Precio_prod" />
+                <br />
+                <input type="text" name="Categoria" placeholder="Escribe la categoria del producto" class="form-control" @bind="producto.Categoria_prod" />
+                <br />
+                <input type="text" name="Vendedor" placeholder="Escriba el codigo del vendedor" class="form-control" @bind="producto.Id_vendedor" />
+                <br />
+
+                <input class="btn btn-success" type="submit" value="Agregar" @onclick="@InsertarProducto" />
+        </thead>
+    </table>
+</form>
+
+
+
+
+
+
+
+@code {
+
+    public Producto producto = new Producto();
+
+
+
+    async Task InsertarProducto()
+    {
+        await ProductoService.ProductoInsert(producto);
+
+    }
+
+
+
+
+}

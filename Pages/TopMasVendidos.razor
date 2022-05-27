@@ -1,0 +1,131 @@
+﻿@page "/TopVendidos"
+@using Data.Model
+@using Data.Service
+
+@inject IDevolucionService DevolucionService
+@inject IFacturaService FacturaService
+@inject IFacturaProductoService FacturaProductoService
+@inject IDevolucionProductoService DevolucionProductoService
+@inject NavigationManager NavigationManager
+
+<h1 class="text-center">TOP DE VENTAS </h1>
+<table width="1000" cellspacing="10">
+    <thead>
+        <tr>
+            <th>Mas vendidos Por Categoria</th>
+
+            <td>
+                <select name="categoria" id="cat" @bind="selectedString" @onclick="@click1">
+
+
+                    <option value="accesorios tecnologicos">accesorios tecnologicos</option>
+                    <option value="Pantallas">Pantallas</option>
+                    <option value="Computadores">Computadores</option>
+                    <option value="Deportes">Deportes</option>
+                    <option value="Video Juegos">Video Juegos</option>
+
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <th>Top Mas Caros</th>
+
+            <td>
+                <select name="precio" id="precio" @bind="selectedString2" @onclick="@click2">
+
+
+                    <option value="accesorios tecnologicos">accesorios tecnologicos</option>
+                    <option value="Pantallas">Pantallas</option>
+                    <option value="Computadores">Computadores</option>
+                    <option value="Deportes">Deportes</option>
+                    <option value="Video Juegos">Video Juegos</option>
+
+                </select>
+            </td>
+        </tr>
+
+
+
+    </thead>
+</table>
+
+<table width="1000" cellspacing="50">
+    <thead>
+        <tr>
+            <th colspan="1" class="text-center">PRODUCTO</th>
+            <th colspan="1" class="text-center">PRECIO</th>
+            <th colspan="1" class="text-center">FACTURA</th>
+            <th colspan="1" class="text-center">CANTIDAD COMPRADA</th>
+            <th colspan="1" class="text-center">CATEGORIA</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (selectedString2 != null)
+        {
+            @*selectedString = null;*@
+            @foreach (var fproducto2 in fproductos2)
+            {
+                @if (selectedString2.Equals(fproducto2.Categoria_prod))
+                {
+                    <tr>
+                        <td colspan="1" class="text-center">@fproducto2.Id_Prod</td>
+                        <td colspan="1" class="text-center">@fproducto2.Precio</td>
+                        <td colspan="1" class="text-center">@fproducto2.Id_factura</td>
+                        <td colspan="1" class="text-center" width="1">@fproducto2.Cantidad</td>
+                        <td colspan="1" class="text-center">@fproducto2.Categoria_prod</td>
+
+                    </tr>
+
+                }
+            }
+        }
+        @if (selectedString != null)
+        {
+            @*selectedString2 = null;*@
+                        @foreach (var fproducto in fproductos2)
+                        {
+                            @if (selectedString.Equals(fproducto.Categoria_prod))
+                            {
+                                <tr>
+                                    <td colspan="1" class="text-center">@fproducto.Id_Prod</td>
+                                    <td colspan="1" class="text-center">@fproducto.Precio</td>
+                                    <td colspan="1" class="text-center">@fproducto.Id_factura</td>
+                                    <td colspan="1" class="text-center" width="1">@fproducto.Cantidad</td>
+                                    <td colspan="1" class="text-center">@fproducto.Categoria_prod</td>
+
+                                </tr>
+
+                            }
+                        }
+                    }
+
+                    <tr><th><br />  </th></tr>
+                    <tr><th><br />  </th></tr>
+                </tbody>
+
+            </table>
+
+
+            @code {
+
+                    IEnumerable<FacturaProducto> fproductos, fproductos2;
+                public string selectedString;
+                public string selectedString2;
+
+                protected override async Task OnInitializedAsync()
+                {
+                    fproductos = await FacturaProductoService.GetAllFacturasProductos();
+                    fproductos2 = await FacturaProductoService.GetAllFPrecios();
+                }
+
+                public void click1()
+                {
+
+                selectedString2= null;
+                }
+                public void click2()
+                {
+                selectedString= null;
+                    }
+                }
+

@@ -1,0 +1,210 @@
+﻿@page "/DevolucionAdd"
+@using Data.Model
+@using Data.Service
+
+@inject IDevolucionService DevolucionService
+@inject IFacturaService FacturaService
+@inject IFacturaProductoService FacturaProductoService
+@inject IDevolucionProductoService DevolucionProductoService
+@inject NavigationManager NavigationManager
+
+<h1 class="text-center">Registre Su Devolucion</h1>
+
+<EditForm Model="@devolucion">
+    <table width="1000" cellspacing="50">
+        <thead>
+            <tr>
+                <th colspan="1" class="text-center"> Cliente  </th>
+                <td colspan="1" class="text-center">@idclient</td>
+                <th colspan="1" class="text-center"> Fecha  </th>
+                <td colspan="1" class="text-center">@now</td>
+                <td>
+                </td>
+            </tr>
+            <tr><th><br />  </th></tr>
+
+            <tr>
+                <th colspan="1" class="text-center">PRODUCTO</th>
+                <th colspan="1" class="text-center">PRECIO</th>
+                <th colspan="1" class="text-center">FACTURA</th>
+                <th colspan="1" class="text-center">CANTIDAD COMPRADA</th>
+                <th colspan="1" class="text-center">CANTIDAD A DEVOLVER</th>
+                <th colspan="1" class="text-center">SELECCION DE PRODUCTO</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (fproductos != null)
+            {
+                @foreach (var fproducto in fproductos)
+                {
+                    @if (idclient.Equals(fproducto.Id_cliente))
+                    {
+                        <tr>
+                            <td colspan="1" class="text-center">@fproducto.Id_Prod</td>
+                            <td colspan="1" class="text-center">@fproducto.Precio</td>
+                            <td colspan="1" class="text-center">@fproducto.Id_factura</td>
+                            <td colspan="1" class="text-center" width="1">@fproducto.Cantidad</td>
+                            <td colspan="1" class=text-center> <input type="text" size="1" @oninput="@((e) => { fproducto.Cantidad2=(string)e.Value;})" /></td>
+                            <td colspan="1" class="text-center">
+                                <input type="checkbox" @onchange="eventArgs => { CheckboxSeleccionado(fproducto.Id_Prod,fproducto.Id_factura, eventArgs.Value); }" value="Seleccionar" />
+                            </td>
+                        </tr>
+
+                    }
+                }
+            }
+
+            <tr><th><br />  </th></tr>
+            <tr><th><br />  </th></tr>
+        </tbody>
+
+    </table>
+    <table>
+        <tbody>
+            <tr>
+
+
+                <td colspan="2">
+                    <input type="submit" value="Crear Devolucion" @onclick="@CrearDevolucion" />
+                    <input type="button" value="Cancelar" @onclick="@Cancel" />
+                </td>
+            </tr>
+
+        </tbody>
+
+    </table>
+
+    @if (iddev != null)
+    {
+        <h1 class="text-center">La devolucion fue creada!!!</h1>
+        <table>
+            <tr>
+                <th colspan="1" class="text-center"> ID Devolucion  </th>
+                @foreach (var iddev2 in iddev)
+                {
+                    <td colspan="1" class="text-center">@iddev2.Id_dev</td>
+                    dproductos.Id_dev = iddev2.Id_dev;
+                }
+            </tr>
+        </table>
+        <table width="1000" cellspacing="50">
+            <thead>
+                <tr>
+                    <th colspan="1" class="text-center">PRODUCTO</th>
+                    <td></td>
+                    <th colspan="1" class="text-center">PRECIO</th>
+                    <td></td>
+                    <th colspan="1" class="text-center">FACTURA</th>
+                    <td></td>
+                    <th colspan="1" class="text-center">CANTIDAD COMPRADA</th>
+                    <td></td>
+                    <th colspan="1" class="text-center">CANTIDAD A DEVOLVER</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var apt in listaProductos)
+                {
+
+                    <tr>
+                        <td colspan="1" class="text-center">@apt.Id_Prod</td>
+                        <td></td>
+                        <td colspan="1" class="text-center">@apt.Precio</td>
+                        <td></td>
+                        <td colspan="1" class="text-center">@apt.Id_factura</td>
+                        <td></td>
+                        <td colspan="1" class="text-center">@apt.Cantidad</td>
+                        <td></td>
+                        <td colspan="1" class="text-center">@apt.Cantidad2</td>
+                    </tr>
+
+
+
+                }
+                <tr><th><br />  </th></tr>
+                <tr><th><br />  </th></tr>
+                <tr>
+                    <td colspan="2">
+                        <input type="submit" value="Agregar Productos" @onclick="@Addproducto" />
+                        <input type="button" value="Cancelar" @onclick="@Cancel" />
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    }
+
+
+
+</EditForm>
+
+
+@code {
+
+
+    IEnumerable<FacturaProducto> fproductos;
+    List<FacturaProducto> listaProductos;
+    Devolucion devolucion = new Devolucion();
+    DevolucionProducto dproductos = new DevolucionProducto();
+    IEnumerable<Devolucion> iddev;
+    public int idclient = 111;
+    string format = "dd/MM/yyyy"; //si quiero que traiga la Hora lo defino asi string format = "dd/MM/yyyy HH:mm:ss"
+    String now; // variable que al iniciarse recibe la hora y la fecha
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        listaProductos = new List<FacturaProducto>();
+        fproductos = await FacturaProductoService.GetAllFacturasProductos();
+        now = DateTime.Now.ToString(format);
+    }
+
+
+    protected async Task CrearDevolucion()
+    {
+        devolucion.Id_cliente = idclient;
+        devolucion.Fecha_dev = now;
+        await DevolucionService.Devolucionadd(devolucion);
+        iddev = await DevolucionService.GetLastID();
+        //NavigationManager.NavigateTo("/");
+    }
+
+    protected async Task Addproducto()
+    {
+        if (listaProductos != null)
+            foreach (var apt in listaProductos)
+            {
+                dproductos.Id_prod = apt.Id_Prod;
+                dproductos.Id_factura = apt.Id_factura;
+                dproductos.Cantidad = Int32.Parse(apt.Cantidad2);
+                dproductos.Fecha_dev = now;
+
+                {
+                    await DevolucionProductoService.Productosinsert(dproductos);
+                    NavigationManager.NavigateTo("/");
+                }
+            }
+    }
+
+    void Cancel()
+    {
+        NavigationManager.NavigateTo("/");
+    }
+
+
+
+    public void CheckboxSeleccionado(int idProducto,int idfactura, object aChecked)
+    {
+
+        foreach (var apt in fproductos)
+        {
+            if (apt.Id_Prod == idProducto && apt.Id_factura ==idfactura)
+            {
+                listaProductos.Add((FacturaProducto)apt);
+
+            }
+        }
+    }
+
+
+}

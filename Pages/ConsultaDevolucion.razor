@@ -1,0 +1,103 @@
+﻿@page "/ConsultaDevolucion"
+@using Curiosityshop.Data.Service
+@using Curiosityshop.Data.Model
+
+@inject IDevolucionService DevolucionService
+@inject NavigationManager NavigationManager
+@inject IDevolucionProductoService DevolucionProductoService
+
+
+<h1>MIS DEVOLUCIONES</h1>
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>CLIENTE</th>
+            <td>
+                <input type="text" name="FrmIdCliente" @bind-value=idclient />
+            </td>
+
+        </tr>
+
+    </thead>
+    <tbody>
+        @if (devoluciones != null)
+        {
+            @foreach (var devolucion in devoluciones)
+            {
+                @if (devolucion.Id_cliente.Equals(idclient))
+                {
+                    <tr>
+                        <th>Devolucion Numero</th>
+                        <th>@devolucion.Id_dev</th>
+                        <th>
+                            <button type="button" class="btn btn-default" aria-label="Left Align" title="Delete" @onclick="()=>BorrarDev(devolucion.Id_dev)">
+                                <span class="oi oi-trash" aria-hidden="true"></span>
+                            </button>
+                        </th>
+
+
+                        <td>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>ID Producto</td>
+                        <td>ID Factura</td>
+                        <td>Fecha Devolucion</td>
+                        <td>Cantidad</td>
+                        <td>Motivo</td>
+                    </tr>
+                }
+                @foreach (var devolucionprod in devolucionesProd)
+                    @if (devolucion.Id_dev.Equals(devolucionprod.Id_dev))
+                    {
+
+                        <tr>
+                            <td>@devolucionprod.Id_prod</td>
+                            <td>@devolucionprod.Id_factura</td>
+                            <td>@devolucionprod.Fecha_dev</td>
+                            <td>@devolucionprod.Cantidad</td>
+                            <td>@devolucionprod.Motivo</td>
+                        </tr>
+                    }
+
+                }
+        }
+    </tbody>
+
+</table>
+
+@code {
+
+    IEnumerable<DevolucionProducto> devolucionesProd;
+    IEnumerable<Devolucion> devoluciones;
+    public int iddev = 0;
+    public int idfact = 0;
+    public int idclient = 111;
+    public string fecha;
+    public string motivo;
+    public int cantidad = 0;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        devolucionesProd = await DevolucionProductoService.GetAllDevProd();
+        devoluciones = await DevolucionService.GetAllDevoluciones();
+    }
+
+    protected async Task BorrarDev(int id)
+    {
+
+        await DevolucionProductoService.DevolucionProductoDelete(id);
+        await DevolucionService.DevolucionDelete(id);
+        NavigationManager.NavigateTo("/");
+        NavigationManager.NavigateTo("/ConsultaDevolucion");
+    }
+
+    void EditarRegistro(int id)
+    {
+        NavigationManager.NavigateTo("/");
+    }
+
+}
